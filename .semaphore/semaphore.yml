@@ -19,21 +19,54 @@ global_job_config:
       - checkout
       - mkdir -p .pip_cache
 blocks:
-  - name: "\U0001F9EA Install Dependecies"
+  - name: 'Block 1: Install Dependecies'
     dependencies: []
     task:
       jobs:
         - name: "\U0001F7E2 Run Tests"
           commands:
             - pip install pytest requests flask coverage locust
-  - name: "\U0001F680 Deploy"
+  - name: 'Block 2: Unit tests'
     dependencies:
-      - "\U0001F9EA Install Dependecies"
+      - 'Block 1: Install Dependecies'
     task:
       jobs:
-        - name: "\U0001F4E6 Deploy to Production"
+        - name: Exercise 1 & Exercise 2
           commands:
-            - echo "Building application..."
-            - echo "Running security checks..."
-            - echo "Deploying to production..."
-            - echo "Deployment completed successfully!"
+            - cd 1-tdd && python -m pytest test_factorial.py -v
+            - cd 2-unit-testing && python -m pytest test_math_sum.py -v
+  - name: 'Block 3: Integration tests'
+    dependencies:
+      - 'Block 1: Install Dependecies'
+    task:
+      jobs:
+        - name: Exercise 3
+          commands:
+            - cd 3-integration-testing && python -m pytest test_integration.py -v
+  - name: 'Block 4: End-to-end tests'
+    dependencies:
+      - 'Block 1: Install Dependecies'
+    task:
+      jobs:
+        - name: Exercise 4
+          commands:
+            - cd 4-e2e && nohup python app.py &
+            - sleep 3
+            - python -m pytest test_e2e.py -v
+  - name: 'Block 5: Test reports'
+    dependencies:
+      - 'Block 1: Install Dependecies'
+    task:
+      jobs:
+        - name: Exercise 5
+          commands:
+            - cd 5-test-reports
+            - pip install -r requirements.txt
+            - pytest --junitxml=reports.xml
+            - '[[ -f report.xml ]] && test-results publish report.xml'
+after_pipeline:
+  task:
+    jobs:
+      - name: Test reports
+        commands:
+          - test-results gen-pipeline-report
