@@ -56,7 +56,9 @@ blocks:
             - python -m pytest test_e2e.py -v
   - name: 'Block 5: Test reports'
     dependencies:
-      - 'Block 1: Install Dependecies'
+      - 'Block 2: Unit tests'
+      - 'Block 3: Integration tests'
+      - 'Block 4: End-to-end tests'
     task:
       jobs:
         - name: Exercise 5
